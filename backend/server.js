@@ -1,16 +1,10 @@
 import express from "express"
+import sessionRoutes from ".routes/sessionRoutes.js"
 
 const app = express()
 
-app.get("/api/notes", (req,res) => {
-    res.status(200).send("you got sessions");
-});
-app.post("/api/notes", (req,res) => {
-    res.status(201).json({message:"session added successfully"})
-});
-app.delete("/api/notes", (req,res) => {
-    res.status(200).send("you got sessions");
-});
+app.use("/api/session", sessionRoutes);
+
 
 app.listen(5001, () => {
     console.log("Server started on port 5001");
