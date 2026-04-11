@@ -1,5 +1,5 @@
 import express from "express"
-import sessionRoutes from ".routes/sessionRoutes.js"
+import sessionRoutes from "./routes/sessionRoutes.js"
 
 const app = express()
 
