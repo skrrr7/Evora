@@ -3,19 +3,28 @@ import EvoraLogo from "../assets/EVORA-LOGO.png";
 
 const Navbar = () => {
   return (
-    <nav className="w-full border-b border-gray-200 bg-white px-6 py-4">
-      <div className="mx-auto flex w-full max-w-7xl items-center justify-between">
-        <div className="flex items-center gap-2">
-          <img src={EvoraLogo} alt="Evora Logo" className="h-8 w-8 object-contain" />
-          <span className="text-lg font-semibold text-gray-900">Evora</span>
+    <nav className="navbar border-b border-base-300 bg-base-100 px-4 md:px-6">
+      <div className="mx-auto flex w-full max-w-7xl items-center">
+        <div className="navbar-start">
+          <div className="btn btn-ghost pointer-events-none gap-3 px-2 normal-case hover:bg-transparent">
+            <div className="h-8 w-8 shrink-0 overflow-hidden">
+              <img
+                src={EvoraLogo}
+                alt="Evora Logo"
+                className="h-full w-full scale-[1.75] object-contain"
+              />
+            </div>
+            <span className="text-2xl font-semibold leading-none">Evora</span>
+          </div>
         </div>
-
-        <button
-          type="button"
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
-        >
-          Add Session
-        </button>
+        <div className="navbar-end">
+          <button
+            type="button"
+            className="btn btn-sm border-sky-300 bg-sky-200 text-sky-900 hover:border-sky-400 hover:bg-sky-300 md:btn-md"
+          >
+            Add Session
+          </button>
+        </div>
       </div>
     </nav>
   );
