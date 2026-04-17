@@ -8,18 +8,16 @@ import toast from "react-hot-toast";
 
 
 const App = () => {
-  return <div>
-
-    <button onClick={() => toast.success("congrats")} className="text-red-500 p-4">Click Me</button>
+  return (
+  <div data-theme="pastel">
     <Routes>
       <Route path="/" element ={<HomePage />}></Route>
       <Route path="/create" element ={<CreatePage />}></Route>
       <Route path="/session/:id" element ={<SessionDetailPage />}></Route>
-      
-      
     </Routes>
 
   </div>
+  );
 };
 
 export default App
