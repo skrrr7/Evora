@@ -1,4 +1,5 @@
 import React from "react";
+import {PlusIcon} from "lucide-react"
 import { Link } from "react-router";
 import EvoraLogo from "../assets/EVORA-LOGO.png";
 
@@ -31,6 +32,7 @@ const Navbar = () => {
       </div>
       <div className="navbar-end flex-1">
         <Link to="/create" className="btn btn-primary">
+        <PlusIcon className="size-5"/>
           Add Session
         </Link>
       </div>
