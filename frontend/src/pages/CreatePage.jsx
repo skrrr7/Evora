@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router";
+import api from "../lib/axios";
 
 const CreatePage = () => {
   const {title, setTitle} = useState("");
@@ -19,7 +20,7 @@ const CreatePage = () => {
 
     setLoading(true)
     try {
-      await axios.post("http://localhost:5001/api/session", {
+      await api.post("/session", {
         title,
         content
       })

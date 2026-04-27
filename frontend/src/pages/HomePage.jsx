@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import RateLimitedUI from "../components/Ratelimit";
-import axios from "axios";
+import api from "../lib/axios";
+
 import toast from "react-hot-toast";
 import SessionCard from "../components/SessionCard";
 
@@ -13,7 +14,7 @@ const HomePage = () => {
   useEffect(() => {
     const fetchSession = async () => {
       try {
-        const res = await axios.get("http://localhost:5001/api/session");
+        const res = await api.get("/session");
         console.log(res.data);
 
         setSession(res.data);
