@@ -5,8 +5,8 @@ import api from "../lib/axios";
 import toast from "react-hot-toast";
 import { ArrowLeftIcon, LoaderIcon, Trash2Icon } from "lucide-react";
 
-const SessionteDetailPage = () => {
-  const [note, setSession] = useState(null);
+const SessionDetailPage = () => {
+  const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
