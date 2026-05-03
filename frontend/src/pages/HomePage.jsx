@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import Navbar from "../components/navbar";
+import Navbar from "../components/Navbar";
 import RateLimitedUI from "../components/Ratelimit";
 import api from "../lib/axios";
 
@@ -41,11 +41,12 @@ const HomePage = () => {
   }, []);
 
   return (
-  <div className="min-h-screen">
+  <div className="relative isolate min-h-screen overflow-hidden bg-slate-950">
+    <div className="absolute inset-0 -z-10 h-full w-full [background:radial-gradient(120%_120%_at_50%_0%,#111827_35%,#020617_100%)]" />
     <Navbar />
     {rateLimited && <RateLimitedUI/>}
 
-    <div className="max-w-7xl mx-auto p-4 mt-6">
+    <div className="max-w-7xl mx-auto p-4 pt-24">
       {loading && <div className="text-center text-primary py-10">Loading session...</div>}
 
       {session.length === 0 && !loading && !rateLimited && <SessionNotFound/>}

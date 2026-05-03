@@ -27,10 +27,10 @@ const SessionCard = ({session,setSession}) => {
     className="card bg-base-100 hover:shadow-lg transition-all duration-200 border-t-4 border-solid border-[#00FF9D]"
   >
     <div className="card-body">
-        <h3 className="card-title text-base-content">{session.title}</h3>
-        <p classname="text-base-content/70 line-clamp-3">{session.content}</p>
+        <h3 className="card-title text-base-content font-semibold">{session.title}</h3>
+        <p className="text-base-content/80 font-medium line-clamp-3">{session.content}</p>
         <div className="card-actions justify-between items-center mt-4">
-            <span className="text-sm text-base-content/60">
+            <span className="text-sm font-medium text-base-content/70">
                 {formatDate(new Date(session.createdAt))}
             </span>
             <div className="flex items-center gap-1">
