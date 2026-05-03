@@ -23,20 +23,21 @@ const SessionCard = ({session,setSession}) => {
     }
   }
   return (
-  <Link to={`/session/${session._id}`}
-    className="card bg-base-100 hover:shadow-lg transition-all duration-200 border-t-4 border-solid border-[#00FF9D]"
+  <Link
+    to={`/session/${session._id}`}
+    className="card border border-blue-300/20 border-t-4 border-t-cyan-400 bg-blue-900/70 text-slate-100 backdrop-blur-sm transition-all duration-200 hover:shadow-lg hover:shadow-slate-950/40"
   >
     <div className="card-body">
-        <h3 className="card-title text-base-content font-semibold">{session.title}</h3>
-        <p className="text-base-content/80 font-medium line-clamp-3">{session.content}</p>
+        <h3 className="card-title font-semibold text-slate-100">{session.title}</h3>
+        <p className="line-clamp-3 font-medium text-slate-200">{session.content}</p>
         <div className="card-actions justify-between items-center mt-4">
-            <span className="text-sm font-medium text-base-content/70">
+            <span className="text-sm font-medium text-slate-300">
                 {formatDate(new Date(session.createdAt))}
             </span>
             <div className="flex items-center gap-1">
-                    <PenSquareIcon className="size-4"/>
-                <button className="btn btn-ghost btn-xs text-error" onClick={(e) => handleDelete(e,session._id)}>
-                    <Trash2Icon classname="size-4" />
+                    <PenSquareIcon className="size-4 text-cyan-300"/>
+                <button className="btn btn-ghost btn-xs text-rose-400 hover:bg-rose-500/10 hover:text-rose-300" onClick={(e) => handleDelete(e,session._id)}>
+                    <Trash2Icon className="size-4" />
                 </button>
 
             </div>

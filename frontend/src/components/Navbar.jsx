@@ -12,8 +12,8 @@ const Navbar = () => {
     <nav className="fixed start-0 top-0 z-20 w-full border-b border-white/10 bg-slate-950/90 backdrop-blur-md">
       <div className="mx-auto flex max-w-screen-xl flex-wrap items-center justify-between p-4">
         <Link to="/" className="flex items-center space-x-3">
-          <img src={EvoraLogo} className="h-10 w-10 object-contain" alt="EVORA logo" />
-          <span className="whitespace-nowrap text-3xl leading-none font-bold text-slate-100">EVORA</span>
+          <img src={EvoraLogo} className="h-14 w-14 object-contain" alt="EVORA logo" />
+          <span className="whitespace-nowrap text-3xl leading-none font-medium text-slate-100">EVORA</span>
         </Link>
 
         <div className="inline-flex items-center space-x-3 md:order-2 md:space-x-0">
