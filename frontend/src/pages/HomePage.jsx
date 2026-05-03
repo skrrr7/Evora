@@ -50,7 +50,7 @@ const HomePage = () => {
 
       {session.length === 0 && !loading && !rateLimited && <SessionNotFound/>}
 
-      {session.length > 0 && !isRateLimited && (
+      {session.length > 0 && !rateLimited && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {session.map((session) => (
             <SessionCard key={session._id} session={session} setSession={setSession} />
