@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import Navbar from "../components/Navbar";
+import Navbar from "../components/navbar";
 import RateLimitedUI from "../components/Ratelimit";
 import api from "../lib/axios";
 

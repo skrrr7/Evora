@@ -5,10 +5,16 @@ import EvoraLogo from "../assets/EVORA-LOGO.png";
 
 const Navbar = () => {
   return (
-    <div className="navbar bg-base-100 px-4">
+    <div className="navbar min-h-0 bg-base-100 px-4 py-2">
       <div className="navbar-start flex-1">
         <Link to="/" className="flex items-center">
-          <img src={EvoraLogo} alt="EVORA logo" className="h-25 w-25 object-contain" />
+          <img
+            src={EvoraLogo}
+            alt="EVORA logo"
+            width={32}
+            height={32}
+            className="h-8 w-8 object-contain"
+          />
         </Link>
       </div>
       <div className="navbar-center hidden md:flex">
@@ -31,7 +37,7 @@ const Navbar = () => {
         </ul>
       </div>
       <div className="navbar-end flex-1">
-        <Link to="/create" className="btn btn-primary">
+        <Link to="/create" className="btn btn-primary btn-sm">
         <PlusIcon className="size-5"/>
           Add Session
         </Link>
