@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from "react-router";
 import api from "../lib/axios";
 import toast from "react-hot-toast";
 import { ArrowLeftIcon, LoaderIcon, Trash2Icon } from "lucide-react";
+import Navbar from "../components/Navbar";
 
 const SessionDetailPage = () => {
   const [session, setSession] = useState(null);
@@ -65,56 +66,65 @@ const SessionDetailPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-base-200 flex items-center justify-center">
-        <LoaderIcon className="animate-spin size-10" />
+      <div className="relative isolate min-h-screen overflow-hidden bg-slate-950 flex items-center justify-center">
+        <div className="absolute inset-0 -z-10 h-full w-full [background:radial-gradient(120%_120%_at_50%_0%,#111827_35%,#020617_100%)]" />
+        <LoaderIcon className="animate-spin size-10 text-cyan-300" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-base-200">
-      <div className="container mx-auto px-4 py-8">
+    <div className="relative isolate min-h-screen overflow-hidden bg-slate-950">
+      <div className="absolute inset-0 -z-10 h-full w-full [background:radial-gradient(120%_120%_at_50%_0%,#111827_35%,#020617_100%)]" />
+      <Navbar />
+      <div className="max-w-7xl mx-auto p-4 pt-24">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center justify-between mb-6">
-            <Link to="/" className="btn btn-ghost">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-slate-900/80 px-4 py-2.5 text-sm font-semibold text-slate-100 transition-colors hover:bg-slate-800"
+            >
               <ArrowLeftIcon className="h-5 w-5" />
               Back to Session
             </Link>
-            <button onClick={handleDelete} className="btn btn-error btn-outline">
+            <button
+              onClick={handleDelete}
+              className="inline-flex items-center gap-2 rounded-lg border border-rose-400/40 bg-rose-500/10 px-4 py-2.5 text-sm font-semibold text-rose-300 transition-colors hover:bg-rose-500/20"
+            >
               <Trash2Icon className="h-5 w-5" />
               Delete Session
             </button>
           </div>
 
-          <div className="card bg-base-100">
-            <div className="card-body">
-              <div className="form-control mb-4">
-                <label className="label">
-                  <span className="label-text">Title</span>
-                </label>
+          <div className="rounded-2xl border border-blue-300/20 bg-blue-900/70 text-slate-100 backdrop-blur-sm">
+            <div className="p-6 md:p-8">
+              <div className="mb-5">
+                <label className="mb-2 block text-sm font-semibold text-slate-200">Title</label>
                 <input
                   type="text"
                   placeholder="Session title"
-                  className="input input-bordered"
+                  className="w-full rounded-lg border border-white/15 bg-slate-950/60 px-4 py-3 text-slate-100 placeholder:text-slate-400 outline-none transition focus:border-cyan-300"
                   value={session.title}
                   onChange={(e) => setSession({ ...session, title: e.target.value })}
                 />
               </div>
 
-              <div className="form-control mb-4">
-                <label className="label">
-                  <span className="label-text">Content</span>
-                </label>
+              <div className="mb-6">
+                <label className="mb-2 block text-sm font-semibold text-slate-200">Content</label>
                 <textarea
                   placeholder="Write your session here..."
-                  className="textarea textarea-bordered h-32"
+                  className="h-40 w-full rounded-lg border border-white/15 bg-slate-950/60 px-4 py-3 text-slate-100 placeholder:text-slate-400 outline-none transition focus:border-cyan-300"
                   value={session.content}
                   onChange={(e) => setSession({ ...session, content: e.target.value })}
                 />
               </div>
 
-              <div className="card-actions justify-end">
-                <button className="btn btn-primary" disabled={saving} onClick={handleSave}>
+              <div className="flex justify-end">
+                <button
+                  className="inline-flex items-center rounded-lg bg-cyan-500 px-5 py-2.5 font-semibold text-slate-950 transition-colors hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-70"
+                  disabled={saving}
+                  onClick={handleSave}
+                >
                   {saving ? "Saving..." : "Save Changes"}
                 </button>
               </div>
