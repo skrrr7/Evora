@@ -2,15 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import api from "../lib/axios";
 import toast from "react-hot-toast";
-import {
-  ArrowLeftIcon,
-  LoaderIcon,
-  MinusIcon,
-  PencilIcon,
-  Trash2Icon,
-  TrendingDownIcon,
-  TrendingUpIcon,
-} from "lucide-react";
+import { ArrowLeftIcon, LoaderIcon, PencilIcon, Trash2Icon } from "lucide-react";
 import Navbar from "../components/Navbar";
 import { formatDateTime } from "../lib/utils";
 
@@ -30,21 +22,10 @@ function formatMoney(n) {
 
 function resultBadgeClass(result) {
   if (result === "WIN")
-    return "border-emerald-400/50 bg-emerald-500/15 text-emerald-300 shadow-[0_0_24px_-4px_rgba(52,211,153,0.45)]";
+    return "border-emerald-400/50 bg-emerald-500/15 text-emerald-300";
   if (result === "LOSS")
-    return "border-rose-400/50 bg-rose-500/15 text-rose-300 shadow-[0_0_24px_-4px_rgba(251,113,133,0.4)]";
+    return "border-rose-400/50 bg-rose-500/15 text-rose-300";
   return "border-slate-500/50 bg-slate-500/15 text-slate-300";
-}
-
-function StatCard({ label, children, highlight, className = "" }) {
-  return (
-    <div
-      className={`rounded-2xl border border-white/10 bg-white/[0.04] p-5 shadow-inner shadow-white/[0.02] backdrop-blur-sm transition-all duration-300 hover:border-white/15 ${highlight ? "border-violet-400/35 bg-gradient-to-br from-violet-500/15 via-white/[0.04] to-cyan-500/10 ring-1 ring-violet-500/25" : ""} ${className}`}
-    >
-      <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">{label}</p>
-      <div className="mt-3">{children}</div>
-    </div>
-  );
 }
 
 const SessionDetailPage = () => {
@@ -99,15 +80,11 @@ const SessionDetailPage = () => {
         end: null,
         profit: null,
         result: r && ["WIN", "LOSS", "DRAW"].includes(r) ? r : null,
-        maxBar: 1,
       };
     }
-    // Always derive from amounts: stored `profit` can be wrong (e.g. 0) because `??` treats 0 as set,
-    // and DB updates may skip Mongoose `pre('save')` so `profit`/`result` can be stale.
     const profit = e - s;
     const result = profit > 0 ? "WIN" : profit < 0 ? "LOSS" : "DRAW";
-    const maxBar = Math.max(s, e, 1);
-    return { hasMoney: true, start: s, end: e, profit, result, maxBar };
+    return { hasMoney: true, start: s, end: e, profit, result };
   }, [session]);
 
   const profit = useMemo(() => {
@@ -216,22 +193,17 @@ const SessionDetailPage = () => {
 
   const resultBadgeClassForm =
     resultPreview === "WIN"
-      ? "border-emerald-400/50 bg-emerald-500/15 text-emerald-300 shadow-[0_0_24px_-4px_rgba(52,211,153,0.45)]"
+      ? "border-emerald-400/50 bg-emerald-500/15 text-emerald-300"
       : resultPreview === "LOSS"
-        ? "border-rose-400/50 bg-rose-500/15 text-rose-300 shadow-[0_0_24px_-4px_rgba(251,113,133,0.4)]"
+        ? "border-rose-400/50 bg-rose-500/15 text-rose-300"
         : resultPreview === "DRAW"
           ? "border-slate-500/50 bg-slate-500/15 text-slate-300"
           : "";
 
-  const pctChange =
-    analytics?.hasMoney && analytics.start !== 0
-      ? ((analytics.end - analytics.start) / Math.abs(analytics.start)) * 100
-      : null;
-
   if (loading) {
     return (
       <div className="relative isolate flex min-h-screen items-center justify-center overflow-hidden bg-slate-950 font-sans">
-        <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_120%_80%_at_50%_-20%,rgba(139,92,246,0.35),transparent_55%),radial-gradient(ellipse_80%_50%_at_100%_50%,rgba(34,211,238,0.12),transparent_50%)]" />
+        <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_100%_60%_at_50%_0%,rgba(139,92,246,0.2),transparent_50%)]" />
         <LoaderIcon className="size-10 animate-spin text-cyan-300" />
       </div>
     );
@@ -249,28 +221,27 @@ const SessionDetailPage = () => {
   const created = new Date(session.createdAt);
   const displayResult = analytics?.result;
   const notesBody =
-    (session.notes && session.notes.trim()) || (typeof session.content === "string" && session.content.trim()) || "No notes for this session.";
-  const gameLabel = session.game?.trim() || "—";
+    (session.notes && session.notes.trim()) ||
+    (typeof session.content === "string" && session.content.trim()) ||
+    "No notes.";
 
   return (
     <div className="relative isolate min-h-screen overflow-hidden bg-slate-950 font-sans text-slate-100">
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_80%_at_50%_-20%,rgba(139,92,246,0.35),transparent_55%),radial-gradient(ellipse_80%_50%_at_100%_50%,rgba(34,211,238,0.12),transparent_50%),radial-gradient(ellipse_60%_40%_at_0%_80%,rgba(167,139,250,0.15),transparent_45%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent,rgba(2,6,23,0.92))]" />
-      </div>
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_100%_70%_at_50%_-10%,rgba(139,92,246,0.22),transparent_50%),radial-gradient(ellipse_80%_50%_at_100%_60%,rgba(34,211,238,0.08),transparent_45%)]" />
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-transparent to-slate-950" />
 
       <Navbar />
 
-      <main className="mx-auto max-w-6xl px-4 pb-20 pt-24">
-        <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+      <main className="mx-auto max-w-2xl px-4 pb-20 pt-24">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <Link
             to="/"
-            className="group inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-slate-200 backdrop-blur-md transition-all duration-300 hover:border-cyan-400/30 hover:bg-white/10 hover:text-white hover:shadow-[0_0_20px_-4px_rgba(34,211,238,0.35)]"
+            className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium text-slate-300 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
           >
-            <ArrowLeftIcon className="size-4 transition-transform duration-300 group-hover:-translate-x-0.5" />
-            Back to sessions
+            <ArrowLeftIcon className="size-4" />
+            Back
           </Link>
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => {
@@ -281,15 +252,15 @@ const SessionDetailPage = () => {
                   setEditOpen(true);
                 }
               }}
-              className="inline-flex items-center gap-2 rounded-2xl border border-violet-400/30 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-200 transition-all duration-300 hover:border-violet-400/50 hover:bg-violet-500/20"
+              className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium text-slate-200 transition hover:border-violet-400/30 hover:bg-violet-500/10"
             >
               <PencilIcon className="size-4" />
-              {editOpen ? "Close editor" : "Edit session"}
+              {editOpen ? "Close" : "Edit"}
             </button>
             <button
               type="button"
               onClick={handleDelete}
-              className="inline-flex items-center gap-2 rounded-2xl border border-rose-400/40 bg-rose-500/10 px-4 py-2.5 text-sm font-semibold text-rose-300 transition-all duration-300 hover:bg-rose-500/20"
+              className="inline-flex items-center gap-2 rounded-xl border border-rose-500/25 bg-rose-500/10 px-3 py-2 text-sm font-medium text-rose-300 transition hover:bg-rose-500/15"
             >
               <Trash2Icon className="size-4" />
               Delete
@@ -297,323 +268,176 @@ const SessionDetailPage = () => {
           </div>
         </div>
 
-        {/* Report header */}
-        <header className="mb-10 rounded-2xl border border-white/10 bg-white/[0.06] p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.04)_inset,0_24px_48px_-12px_rgba(0,0,0,0.45)] backdrop-blur-xl sm:p-8">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-            <div className="min-w-0 flex-1">
-              <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
-                {session.title || "Untitled session"}
+        <article className="rounded-2xl border border-white/10 bg-white/[0.05] p-6 shadow-lg shadow-black/20 backdrop-blur-xl sm:p-8">
+          <div className="flex flex-col gap-4 border-b border-white/10 pb-6 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+            <div className="min-w-0">
+              <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+                {session.title || "Untitled"}
               </h1>
-              <p className="mt-3 text-lg font-medium text-violet-200/90">{gameLabel}</p>
-              <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-400">
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="size-1.5 rounded-full bg-cyan-400/80" aria-hidden />
-                  {formatDateTime(created)}
-                </span>
-              </p>
+              <p className="mt-1 text-sm text-violet-200/80">{session.game?.trim() || "—"}</p>
+              <p className="mt-3 text-xs text-slate-500">{formatDateTime(created)}</p>
             </div>
             {displayResult && (
               <span
-                className={`inline-flex shrink-0 items-center justify-center self-start rounded-2xl border px-6 py-3 text-lg font-bold tracking-wide ${resultBadgeClass(displayResult)}`}
+                className={`inline-flex shrink-0 self-start rounded-xl border px-4 py-2 text-sm font-bold tracking-wide ${resultBadgeClass(displayResult)}`}
               >
                 {displayResult}
               </span>
             )}
           </div>
-        </header>
 
-        {/* Key stats */}
-        <section className="mb-10" aria-labelledby="stats-heading">
-          <h2 id="stats-heading" className="sr-only">
-            Key statistics
-          </h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <StatCard label="Start money">
-              <p className="text-2xl font-bold tabular-nums text-white">
-                {analytics?.hasMoney ? formatMoney(analytics.start) : "—"}
-              </p>
-            </StatCard>
-            <StatCard label="End money">
-              <p className="text-2xl font-bold tabular-nums text-white">
-                {analytics?.hasMoney ? formatMoney(analytics.end) : "—"}
-              </p>
-            </StatCard>
-            <StatCard label="Profit" highlight>
-              <p
-                className={`text-2xl font-bold tabular-nums ${
-                  analytics?.profit == null
-                    ? "text-slate-400"
-                    : analytics.profit > 0
-                      ? "text-emerald-300"
-                      : analytics.profit < 0
-                        ? "text-rose-300"
-                        : "text-slate-200"
-                }`}
-              >
-                {analytics?.hasMoney
-                  ? `${analytics.profit >= 0 ? "+" : ""}${formatMoney(analytics.profit)}`
-                  : "—"}
-              </p>
-              {analytics?.hasMoney && (
-                <p className="mt-1 text-xs text-slate-500">End balance minus start balance</p>
-              )}
-            </StatCard>
-            <StatCard label="Result">
-              {displayResult ? (
-                <span
-                  className={`inline-flex rounded-xl border px-4 py-2 text-sm font-bold tracking-wide ${resultBadgeClass(displayResult)}`}
-                >
-                  {displayResult}
+          {analytics?.hasMoney && (
+            <div className="border-b border-white/10 py-6">
+              <p className="text-xs font-medium uppercase tracking-wider text-slate-500">Bankroll</p>
+              <div className="mt-4 flex flex-wrap items-baseline gap-x-6 gap-y-2 text-sm">
+                <span className="text-slate-400">
+                  Start{" "}
+                  <span className="ml-1 font-semibold tabular-nums text-white">{formatMoney(analytics.start)}</span>
                 </span>
-              ) : (
-                <p className="text-lg font-semibold text-slate-500">—</p>
-              )}
-            </StatCard>
-          </div>
-        </section>
-
-        {/* Visualization + trend */}
-        {analytics?.hasMoney && (
-          <section className="mb-10 grid gap-6 lg:grid-cols-3" aria-labelledby="viz-heading">
-            <h2 id="viz-heading" className="sr-only">
-              Performance visualization
-            </h2>
-            <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.04)_inset] backdrop-blur-xl lg:col-span-2">
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-400">
-                Bankroll comparison
-              </h3>
-              <p className="mt-1 text-xs text-slate-500">Start vs end balance (same scale)</p>
-              <div className="mt-6 space-y-5">
-                <div>
-                  <div className="mb-2 flex justify-between text-sm">
-                    <span className="font-medium text-violet-200">Start</span>
-                    <span className="tabular-nums text-slate-300">{formatMoney(analytics.start)}</span>
-                  </div>
-                  <div className="h-3 overflow-hidden rounded-full bg-slate-900/80 ring-1 ring-white/10">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-violet-600 to-violet-400 transition-all duration-500"
-                      style={{ width: `${(analytics.start / analytics.maxBar) * 100}%` }}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <div className="mb-2 flex justify-between text-sm">
-                    <span className="font-medium text-cyan-200">End</span>
-                    <span className="tabular-nums text-slate-300">{formatMoney(analytics.end)}</span>
-                  </div>
-                  <div className="h-3 overflow-hidden rounded-full bg-slate-900/80 ring-1 ring-white/10">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-cyan-600 to-cyan-400 transition-all duration-500"
-                      style={{ width: `${(analytics.end / analytics.maxBar) * 100}%` }}
-                    />
-                  </div>
-                </div>
+                <span className="text-slate-600">→</span>
+                <span className="text-slate-400">
+                  End{" "}
+                  <span className="ml-1 font-semibold tabular-nums text-white">{formatMoney(analytics.end)}</span>
+                </span>
+                <span className="text-slate-600">·</span>
+                <span className="text-slate-400">
+                  Profit{" "}
+                  <span
+                    className={`ml-1 font-semibold tabular-nums ${
+                      analytics.profit > 0
+                        ? "text-emerald-300"
+                        : analytics.profit < 0
+                          ? "text-rose-300"
+                          : "text-slate-200"
+                    }`}
+                  >
+                    {analytics.profit >= 0 ? "+" : ""}
+                    {formatMoney(analytics.profit)}
+                  </span>
+                </span>
               </div>
             </div>
+          )}
 
-            <div
-              className={`rounded-2xl border p-6 backdrop-blur-xl ${
-                analytics.profit > 0
-                  ? "border-emerald-400/30 bg-emerald-500/[0.08]"
-                  : analytics.profit < 0
-                    ? "border-rose-400/30 bg-rose-500/[0.08]"
-                    : "border-slate-500/30 bg-slate-500/[0.06]"
-              }`}
-            >
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-400">Session trend</h3>
-              <div className="mt-4 flex items-start gap-3">
-                {analytics.profit > 0 && (
-                  <TrendingUpIcon className="size-8 shrink-0 text-emerald-400" aria-hidden />
-                )}
-                {analytics.profit < 0 && (
-                  <TrendingDownIcon className="size-8 shrink-0 text-rose-400" aria-hidden />
-                )}
-                {analytics.profit === 0 && (
-                  <MinusIcon className="size-8 shrink-0 text-slate-400" aria-hidden />
-                )}
-                <div>
-                  <p className="text-lg font-bold text-white">
-                    {analytics.profit > 0 && "Bankroll up"}
-                    {analytics.profit < 0 && "Bankroll down"}
-                    {analytics.profit === 0 && "Flat session"}
-                  </p>
-                  <p className="mt-2 text-sm leading-relaxed text-slate-300">
-                    Net change of{" "}
-                    <span className="font-semibold tabular-nums text-white">
-                      {analytics.profit >= 0 ? "+" : ""}
-                      {formatMoney(analytics.profit)}
-                    </span>
-                    {pctChange != null && Number.isFinite(pctChange) && (
-                      <>
-                        {" "}
-                        <span className="text-slate-500">·</span>{" "}
-                        <span className="font-semibold tabular-nums text-white">
-                          {pctChange >= 0 ? "+" : ""}
-                          {pctChange.toFixed(1)}%
-                        </span>{" "}
-                        <span className="text-slate-500">vs start</span>
-                      </>
-                    )}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
-        )}
+          {!analytics?.hasMoney && (
+            <p className="border-b border-white/10 py-5 text-sm text-slate-500">No start or end balance recorded.</p>
+          )}
 
-        {!analytics?.hasMoney && (
-          <div className="mb-10 rounded-2xl border border-dashed border-white/15 bg-white/[0.03] p-8 text-center text-slate-400 backdrop-blur-sm">
-            No start/end money on this session — add amounts when editing to unlock charts and profit analytics.
+          <div className="pt-6">
+            <h2 className="text-xs font-medium uppercase tracking-wider text-slate-500">Notes</h2>
+            <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-slate-300">{notesBody}</p>
           </div>
-        )}
+        </article>
 
-        {/* Breakdown */}
-        <section
-          className="rounded-2xl border border-white/10 bg-white/[0.06] p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.04)_inset,0_24px_48px_-12px_rgba(0,0,0,0.45)] backdrop-blur-xl sm:p-8"
-          aria-labelledby="breakdown-heading"
-        >
-          <h2 id="breakdown-heading" className="text-lg font-bold text-white">
-            Session breakdown
-          </h2>
-          <p className="mt-1 text-sm text-slate-400">Full record for this entry</p>
-          <dl className="mt-8 divide-y divide-white/10">
-            <div className="grid gap-1 py-4 sm:grid-cols-3 sm:gap-4">
-              <dt className="text-xs font-semibold uppercase tracking-wider text-slate-500">Title</dt>
-              <dd className="text-slate-100 sm:col-span-2">{session.title || "—"}</dd>
-            </div>
-            <div className="grid gap-1 py-4 sm:grid-cols-3 sm:gap-4">
-              <dt className="text-xs font-semibold uppercase tracking-wider text-slate-500">Game</dt>
-              <dd className="text-slate-100 sm:col-span-2">{gameLabel}</dd>
-            </div>
-            <div className="grid gap-1 py-4 sm:grid-cols-3 sm:gap-4">
-              <dt className="text-xs font-semibold uppercase tracking-wider text-slate-500">Timestamp</dt>
-              <dd className="font-mono text-sm text-cyan-200/90 sm:col-span-2">{formatDateTime(created)}</dd>
-            </div>
-            <div className="grid gap-1 py-4 sm:grid-cols-3 sm:gap-4">
-              <dt className="text-xs font-semibold uppercase tracking-wider text-slate-500">Notes</dt>
-              <dd className="whitespace-pre-wrap text-slate-200 sm:col-span-2">{notesBody}</dd>
-            </div>
-          </dl>
-        </section>
-
-        {/* Collapsible editor */}
         {editOpen && (
-          <section className="mt-10 rounded-2xl border border-violet-400/25 bg-white/[0.04] p-6 backdrop-blur-xl sm:p-8">
-            <h2 className="text-xl font-bold text-white">Edit session</h2>
-            <p className="mt-1 text-sm text-slate-400">Update fields — analytics refresh after save.</p>
-            <div className="mt-8 space-y-5">
+          <section className="mt-6 rounded-2xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-xl sm:p-8">
+            <h2 className="text-lg font-semibold text-white">Edit</h2>
+            <div className="mt-6 space-y-4">
               <div>
-                <label className="mb-2 block text-sm font-semibold text-slate-200">Title</label>
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-slate-500">
+                  Title
+                </label>
                 <input
                   type="text"
-                  placeholder="Session title"
-                  className={`w-full rounded-2xl border bg-slate-950/50 px-4 py-3 text-slate-100 outline-none transition-all duration-300 placeholder:text-slate-500 focus:border-violet-400/60 focus:ring-2 focus:ring-violet-500/30 ${
-                    errors.title ? "border-rose-500/50" : "border-white/10 hover:border-violet-400/25"
+                  className={`w-full rounded-xl border bg-slate-950/50 px-3 py-2.5 text-sm text-white outline-none focus:ring-2 focus:ring-violet-500/30 ${
+                    errors.title ? "border-rose-500/50" : "border-white/10"
                   }`}
                   value={session.title}
                   onBlur={() => markTouched("title")}
                   onChange={(e) => setSession({ ...session, title: e.target.value })}
                 />
-                {errors.title && <p className="mt-1.5 text-sm text-rose-400">{errors.title}</p>}
+                {errors.title && <p className="mt-1 text-xs text-rose-400">{errors.title}</p>}
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-semibold text-slate-200">Game</label>
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-slate-500">Game</label>
                 <input
                   type="text"
-                  className={`w-full rounded-2xl border bg-slate-950/50 px-4 py-3 text-slate-100 outline-none transition-all duration-300 focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/25 ${
-                    errors.game ? "border-rose-500/50" : "border-white/10 hover:border-cyan-400/25"
+                  className={`w-full rounded-xl border bg-slate-950/50 px-3 py-2.5 text-sm text-white outline-none focus:ring-2 focus:ring-cyan-500/25 ${
+                    errors.game ? "border-rose-500/50" : "border-white/10"
                   }`}
                   value={session.game ?? ""}
                   onBlur={() => markTouched("game")}
                   onChange={(e) => setSession({ ...session, game: e.target.value })}
                 />
-                {errors.game && <p className="mt-1.5 text-sm text-rose-400">{errors.game}</p>}
+                {errors.game && <p className="mt-1 text-xs text-rose-400">{errors.game}</p>}
               </div>
 
-              <div className="grid gap-5 sm:grid-cols-2">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="mb-2 block text-sm font-semibold text-slate-200">Start money</label>
+                  <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-slate-500">
+                    Start
+                  </label>
                   <input
                     type="number"
                     inputMode="decimal"
                     step="any"
-                    className={`w-full rounded-2xl border bg-slate-950/50 px-4 py-3 text-slate-100 outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none ${
+                    className={`w-full rounded-xl border bg-slate-950/50 px-3 py-2.5 text-sm text-white outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none ${
                       errors.startMoney ? "border-rose-500/50" : "border-white/10"
                     }`}
                     value={startMoney}
                     onBlur={() => markTouched("startMoney")}
                     onChange={(e) => setStartMoney(e.target.value)}
                   />
-                  {errors.startMoney && (
-                    <p className="mt-1.5 text-sm text-rose-400">{errors.startMoney}</p>
-                  )}
+                  {errors.startMoney && <p className="mt-1 text-xs text-rose-400">{errors.startMoney}</p>}
                 </div>
                 <div>
-                  <label className="mb-2 block text-sm font-semibold text-slate-200">End money</label>
+                  <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-slate-500">End</label>
                   <input
                     type="number"
                     inputMode="decimal"
                     step="any"
-                    className={`w-full rounded-2xl border bg-slate-950/50 px-4 py-3 text-slate-100 outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none ${
+                    className={`w-full rounded-xl border bg-slate-950/50 px-3 py-2.5 text-sm text-white outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none ${
                       errors.endMoney ? "border-rose-500/50" : "border-white/10"
                     }`}
                     value={endMoney}
                     onBlur={() => markTouched("endMoney")}
                     onChange={(e) => setEndMoney(e.target.value)}
                   />
-                  {errors.endMoney && <p className="mt-1.5 text-sm text-rose-400">{errors.endMoney}</p>}
+                  {errors.endMoney && <p className="mt-1 text-xs text-rose-400">{errors.endMoney}</p>}
                 </div>
               </div>
 
               {moneyPreviewReady && (
-                <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-violet-500/10 via-transparent to-cyan-500/10 px-4 py-4">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Profit preview</p>
-                      <p className="mt-1 text-lg font-bold tabular-nums text-white">
-                        {profit >= 0 ? "+" : ""}
-                        {formatMoney(profit)}
-                      </p>
-                      <p className="text-xs text-slate-500">End − Start</p>
-                    </div>
-                    {resultPreview && (
-                      <span
-                        className={`inline-flex min-w-[5.5rem] items-center justify-center rounded-xl border px-4 py-2 text-sm font-bold tracking-wide ${resultBadgeClassForm}`}
-                      >
-                        {resultPreview}
-                      </span>
-                    )}
-                  </div>
-                </div>
+                <p className="text-sm text-slate-400">
+                  Preview:{" "}
+                  <span className="font-semibold tabular-nums text-white">
+                    {profit >= 0 ? "+" : ""}
+                    {formatMoney(profit)}
+                  </span>
+                  {resultPreview && (
+                    <span className={`ml-2 inline-block rounded-md border px-2 py-0.5 text-xs font-bold ${resultBadgeClassForm}`}>
+                      {resultPreview}
+                    </span>
+                  )}
+                </p>
               )}
 
               <div>
-                <label className="mb-2 block text-sm font-semibold text-slate-200">Notes</label>
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-slate-500">Notes</label>
                 <textarea
                   rows={4}
-                  placeholder="Notes…"
-                  className="w-full resize-y rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-slate-100 outline-none focus:border-cyan-400/50 focus:ring-2 focus:ring-cyan-400/20"
+                  className="w-full resize-y rounded-xl border border-white/10 bg-slate-950/50 px-3 py-2.5 text-sm text-white outline-none focus:ring-2 focus:ring-cyan-500/20"
                   value={session.notes ?? ""}
                   onChange={(e) => setSession({ ...session, notes: e.target.value })}
                 />
               </div>
 
-              <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
+              <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
                 <button
                   type="button"
                   onClick={handleCancelEdit}
-                  className="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/5 px-6 py-3 text-sm font-semibold text-slate-200 transition-all duration-300 hover:border-white/25 hover:bg-white/10"
+                  className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-white/10"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
-                  className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-violet-900/40 transition-all duration-300 hover:from-violet-500 hover:to-fuchsia-500 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
                   disabled={saving}
                   onClick={handleSave}
                 >
-                  {saving ? "Saving…" : "Save changes"}
+                  {saving ? "Saving…" : "Save"}
                 </button>
               </div>
             </div>
