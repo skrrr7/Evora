@@ -113,29 +113,29 @@ function SessionTableRow({ row, setSession }) {
   return (
     <Link
       to={`/session/${session._id}`}
-      className="group grid grid-cols-[1fr_auto_auto_auto] items-center gap-3 border-b border-zinc-800/80 px-4 py-3.5 transition-colors hover:bg-zinc-800/40 sm:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)_auto_auto_auto_auto]"
+      className="group grid grid-cols-[1fr_auto_auto_auto] items-center gap-x-3 border-b border-zinc-800/80 px-4 py-3.5 transition-colors hover:bg-zinc-800/40 sm:grid-cols-[minmax(0,1.25fr)_minmax(0,0.85fr)_5.25rem_5.25rem_8.5rem_2.5rem]"
     >
       <span className="min-w-0 truncate font-medium text-zinc-100">{session.title}</span>
-      <span className="hidden min-w-0 truncate text-sm text-zinc-500 sm:block">{session.game || "—"}</span>
-      <span
-        className={`justify-self-end rounded-md px-2 py-0.5 text-center text-[11px] font-semibold uppercase tracking-wide ${resultStyles(result)}`}
-      >
-        {result ?? "—"}
+      <span className="hidden min-w-0 truncate text-left text-sm text-zinc-500 sm:block">{session.game || "—"}</span>
+      <span className="flex justify-end">
+        <span
+          className={`inline-flex rounded-md px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${resultStyles(result)}`}
+        >
+          {result ?? "—"}
+        </span>
       </span>
       <span
-        className={`justify-self-end text-right text-sm tabular-nums ${
+        className={`text-right text-sm tabular-nums ${
           profit == null ? "text-zinc-600" : profit > 0 ? "text-emerald-400" : profit < 0 ? "text-rose-400" : "text-zinc-400"
         }`}
       >
         {profit == null ? "—" : `${profit >= 0 ? "+" : ""}${formatMoney(profit)}`}
       </span>
-      <span className="hidden text-right text-xs tabular-nums text-zinc-500 sm:block">
-        {formatDate(row.date)}
-      </span>
+      <span className="hidden text-right text-xs tabular-nums text-zinc-500 sm:block">{formatDate(row.date)}</span>
       <button
         type="button"
         onClick={handleDelete}
-        className="justify-self-end rounded-md p-1.5 text-zinc-500 opacity-0 transition hover:bg-rose-500/10 hover:text-rose-400 group-hover:opacity-100"
+        className="flex justify-end rounded-md p-1.5 text-zinc-500 opacity-0 transition hover:bg-rose-500/10 hover:text-rose-400 group-hover:opacity-100"
         aria-label="Delete session"
       >
         <Trash2Icon className="size-4" />
@@ -279,8 +279,9 @@ const HomePage = () => {
   const winLossTotal = stats.wins + stats.losses + stats.draws;
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
-      <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgb(39_39_42_/_0.5),transparent)]" />
+    <div className="relative isolate min-h-screen overflow-hidden bg-slate-950 font-sans text-slate-100">
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_100%_70%_at_50%_-10%,rgba(139,92,246,0.22),transparent_50%),radial-gradient(ellipse_80%_50%_at_100%_60%,rgba(34,211,238,0.08),transparent_45%)]" />
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-transparent to-slate-950" />
 
       <Navbar />
       {rateLimited && <RateLimitedUI />}
@@ -331,13 +332,13 @@ const HomePage = () => {
                 <span className="text-xs text-zinc-600">Newest first</span>
               </div>
               <div className="overflow-hidden rounded-lg border border-zinc-800/80 bg-zinc-900/20">
-                <div className="hidden border-b border-zinc-800/80 bg-zinc-900/50 px-4 py-2.5 text-[11px] font-medium uppercase tracking-wider text-zinc-500 sm:grid sm:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)_auto_auto_auto_auto] sm:gap-3">
-                  <span>Session</span>
-                  <span>Game</span>
+                <div className="hidden border-b border-zinc-800/80 bg-zinc-900/50 px-4 py-2.5 text-[11px] font-medium uppercase tracking-wider text-zinc-500 sm:grid sm:grid-cols-[minmax(0,1.25fr)_minmax(0,0.85fr)_5.25rem_5.25rem_8.5rem_2.5rem] sm:gap-x-3">
+                  <span className="text-left">Session</span>
+                  <span className="text-left">Game</span>
                   <span className="text-right">Result</span>
                   <span className="text-right">P/L</span>
                   <span className="text-right">Date</span>
-                  <span />
+                  <span className="block min-h-3 min-w-10 shrink-0" aria-hidden />
                 </div>
                 <div className="divide-y divide-zinc-800/80">
                   {rows.map((row) => (
