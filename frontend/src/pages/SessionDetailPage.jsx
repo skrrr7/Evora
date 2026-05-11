@@ -1,10 +1,16 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import api from "../lib/axios";
 import toast from "react-hot-toast";
-import { ArrowLeftIcon, LoaderIcon, PencilIcon, Trash2Icon } from "lucide-react";
+import {
+  ArrowDownIcon,
+  ArrowLeftIcon,
+  ArrowUpIcon,
+  LoaderIcon,
+  PencilIcon,
+  Trash2Icon,
+} from "lucide-react";
 import Navbar from "../components/Navbar";
-import { formatDateTime } from "../lib/utils";
 
 function parseMoney(value) {
   if (value === "" || value === null || value === undefined) return null;
@@ -20,12 +26,23 @@ function formatMoney(n) {
   }).format(n);
 }
 
-function resultBadgeClass(result) {
-  if (result === "WIN")
-    return "border-emerald-400/50 bg-emerald-500/15 text-emerald-300";
-  if (result === "LOSS")
-    return "border-rose-400/50 bg-rose-500/15 text-rose-300";
-  return "border-slate-500/50 bg-slate-500/15 text-slate-300";
+function formatSessionSubtitleDate(date) {
+  if (!Number.isFinite(date.getTime())) return "";
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+/** Relative to buy-in (start), 0–100 for progress bar / stat card */
+function sessionOutcomePercent(start, profit) {
+  if (!Number.isFinite(start) || start <= 0 || !Number.isFinite(profit)) return null;
+  return Math.min(100, Math.round((Math.abs(profit) / start) * 100));
+}
+
+/** Matches dashboard session badges (HomePage `resultStyles`) */
+function resultBadgeStyles(result) {
+  if (result === "WIN") return "bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/20";
+  if (result === "LOSS") return "bg-rose-500/15 text-rose-400 ring-1 ring-rose-500/20";
+  if (result === "DRAW") return "bg-zinc-500/15 text-zinc-400 ring-1 ring-zinc-500/20";
+  return "bg-zinc-800 text-zinc-500 ring-1 ring-zinc-700";
 }
 
 const SessionDetailPage = () => {
@@ -34,6 +51,7 @@ const SessionDetailPage = () => {
   const [saving, setSaving] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [touched, setTouched] = useState({});
+  const editSectionRef = useRef(null);
 
   const navigate = useNavigate();
   const { id } = useParams();
@@ -53,6 +71,11 @@ const SessionDetailPage = () => {
 
     fetchSession();
   }, [id]);
+
+  useEffect(() => {
+    if (!editOpen || !editSectionRef.current) return;
+    editSectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [editOpen]);
 
   const [startMoney, setStartMoney] = useState("");
   const [endMoney, setEndMoney] = useState("");
@@ -220,10 +243,11 @@ const SessionDetailPage = () => {
 
   const created = new Date(session.createdAt);
   const displayResult = analytics?.result;
-  const notesBody =
+  const notesTrimmed =
     (session.notes && session.notes.trim()) ||
     (typeof session.content === "string" && session.content.trim()) ||
-    "No notes.";
+    "";
+  const hasNotes = Boolean(notesTrimmed);
 
   return (
     <div className="relative isolate min-h-screen overflow-hidden bg-slate-950 font-sans text-slate-100">
@@ -232,106 +256,209 @@ const SessionDetailPage = () => {
 
       <Navbar />
 
-      <main className="mx-auto max-w-2xl px-4 pb-20 pt-24">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+      <main className="mx-auto max-w-2xl px-4 pb-28 pt-24 sm:px-6">
+        <div className="mb-6">
           <Link
             to="/"
-            className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium text-slate-300 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
+            className="group inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm font-medium text-slate-400 transition hover:border-white/15 hover:bg-white/[0.06] hover:text-white"
           >
-            <ArrowLeftIcon className="size-4" />
+            <ArrowLeftIcon className="size-4 transition group-hover:-translate-x-0.5" aria-hidden />
             Back
           </Link>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                if (editOpen) {
-                  void handleCancelEdit();
-                } else {
-                  resetEditForm();
-                  setEditOpen(true);
-                }
-              }}
-              className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium text-slate-200 transition hover:border-violet-400/30 hover:bg-violet-500/10"
-            >
-              <PencilIcon className="size-4" />
-              {editOpen ? "Close" : "Edit"}
-            </button>
-            <button
-              type="button"
-              onClick={handleDelete}
-              className="inline-flex items-center gap-2 rounded-xl border border-rose-500/25 bg-rose-500/10 px-3 py-2 text-sm font-medium text-rose-300 transition hover:bg-rose-500/15"
-            >
-              <Trash2Icon className="size-4" />
-              Delete
-            </button>
-          </div>
         </div>
 
-        <article className="rounded-2xl border border-white/10 bg-white/[0.05] p-6 shadow-lg shadow-black/20 backdrop-blur-xl sm:p-8">
-          <div className="flex flex-col gap-4 border-b border-white/10 pb-6 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
-            <div className="min-w-0">
-              <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-                {session.title || "Untitled"}
-              </h1>
-              <p className="mt-1 text-sm text-violet-200/80">{session.game?.trim() || "—"}</p>
-              <p className="mt-3 text-xs text-slate-500">{formatDateTime(created)}</p>
-            </div>
-            {displayResult && (
-              <span
-                className={`inline-flex shrink-0 self-start rounded-xl border px-4 py-2 text-sm font-bold tracking-wide ${resultBadgeClass(displayResult)}`}
-              >
-                {displayResult}
-              </span>
-            )}
-          </div>
-
-          {analytics?.hasMoney && (
-            <div className="border-b border-white/10 py-6">
-              <p className="text-xs font-medium uppercase tracking-wider text-slate-500">Bankroll</p>
-              <div className="mt-4 flex flex-wrap items-baseline gap-x-6 gap-y-2 text-sm">
-                <span className="text-slate-400">
-                  Start{" "}
-                  <span className="ml-1 font-semibold tabular-nums text-white">{formatMoney(analytics.start)}</span>
-                </span>
-                <span className="text-slate-600">→</span>
-                <span className="text-slate-400">
-                  End{" "}
-                  <span className="ml-1 font-semibold tabular-nums text-white">{formatMoney(analytics.end)}</span>
-                </span>
-                <span className="text-slate-600">·</span>
-                <span className="text-slate-400">
-                  Profit{" "}
-                  <span
-                    className={`ml-1 font-semibold tabular-nums ${
+        <article className="overflow-hidden rounded-lg border border-zinc-800/80 bg-zinc-900/20 shadow-lg shadow-black/20">
+          <div className="p-6 sm:p-8">
+            <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+              <div className="min-w-0 flex-1 space-y-1.5">
+                <h1 className="text-balance text-xl font-semibold tracking-tight text-zinc-50 sm:text-2xl">
+                  {session.title || "Untitled"}
+                </h1>
+                <p className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm text-zinc-500">
+                  <span className="text-zinc-300">{session.game?.trim() || "Game not set"}</span>
+                  <span className="text-zinc-600" aria-hidden>
+                    ·
+                  </span>
+                  <time
+                    className="text-zinc-500"
+                    dateTime={Number.isFinite(created.getTime()) ? created.toISOString() : undefined}
+                  >
+                    {formatSessionSubtitleDate(created)}
+                  </time>
+                </p>
+              </div>
+              {analytics?.hasMoney && displayResult && (
+                <div className="flex shrink-0 flex-col items-start sm:items-end">
+                  <p
+                    className={`text-3xl font-semibold tabular-nums tracking-tight sm:text-4xl ${
                       analytics.profit > 0
-                        ? "text-emerald-300"
+                        ? "text-emerald-400"
                         : analytics.profit < 0
-                          ? "text-rose-300"
-                          : "text-slate-200"
+                          ? "text-rose-400"
+                          : "text-zinc-300"
                     }`}
                   >
-                    {analytics.profit >= 0 ? "+" : ""}
+                    {analytics.profit > 0 ? "+" : ""}
                     {formatMoney(analytics.profit)}
+                  </p>
+                  <span
+                    className={`mt-1.5 inline-flex rounded-md px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${resultBadgeStyles(displayResult)}`}
+                  >
+                    {displayResult}
                   </span>
-                </span>
+                </div>
+              )}
+              {!analytics?.hasMoney && displayResult && (
+                <div className="flex shrink-0 flex-col items-start sm:items-end">
+                  <span
+                    className={`inline-flex rounded-md px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${resultBadgeStyles(displayResult)}`}
+                  >
+                    {displayResult}
+                  </span>
+                </div>
+              )}
+            </header>
+
+            {analytics?.hasMoney && (
+              <section className="mt-8 space-y-6" aria-labelledby="session-summary-heading">
+                <h2 id="session-summary-heading" className="sr-only">
+                  Session summary
+                </h2>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  <div className="rounded-lg border border-zinc-800/80 bg-zinc-900/30 px-4 py-3.5 sm:py-4">
+                    <p className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">Buy-in</p>
+                    <p className="mt-1 text-lg font-semibold tabular-nums text-zinc-50 sm:text-xl">
+                      {formatMoney(analytics.start)}
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-zinc-800/80 bg-zinc-900/30 px-4 py-3.5 sm:py-4">
+                    <p className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">Cash-out</p>
+                    <p className="mt-1 text-lg font-semibold tabular-nums text-zinc-50 sm:text-xl">
+                      {formatMoney(analytics.end)}
+                    </p>
+                  </div>
+                  {(() => {
+                    const pct = sessionOutcomePercent(analytics.start, analytics.profit);
+                    const isLoss = analytics.profit < 0;
+                    const isWin = analytics.profit > 0;
+                    const label = isLoss ? "Loss %" : isWin ? "Win %" : "Net %";
+                    const displayPct = pct === null ? "—" : `${pct}%`;
+                    return (
+                      <div
+                        className={`rounded-lg border px-4 py-3.5 ring-1 sm:py-4 ${
+                          isLoss
+                            ? "border-rose-500/20 bg-rose-500/10 ring-rose-500/15"
+                            : isWin
+                              ? "border-emerald-500/20 bg-emerald-500/10 ring-emerald-500/15"
+                              : "border-zinc-800/80 bg-zinc-900/40 ring-zinc-700/50"
+                        }`}
+                      >
+                        <p
+                          className={`text-[11px] font-medium uppercase tracking-wider ${
+                            isLoss ? "text-rose-400/90" : isWin ? "text-emerald-400/90" : "text-zinc-500"
+                          }`}
+                        >
+                          {label}
+                        </p>
+                        <p
+                          className={`mt-1 text-lg font-semibold tabular-nums sm:text-xl ${
+                            isLoss ? "text-rose-400" : isWin ? "text-emerald-400" : "text-zinc-300"
+                          }`}
+                        >
+                          {displayPct}
+                        </p>
+                      </div>
+                    );
+                  })()}
+                </div>
+
+                {(() => {
+                  const pct = sessionOutcomePercent(analytics.start, analytics.profit);
+                  const barPct = pct === null ? 0 : pct;
+                  const isLoss = analytics.profit < 0;
+                  const isWin = analytics.profit > 0;
+                  const fillClass = isLoss ? "bg-rose-500/80" : isWin ? "bg-emerald-500/80" : "bg-zinc-500";
+                  return (
+                    <div>
+                      <div className="mb-2 flex items-center justify-between gap-3 text-sm text-zinc-500">
+                        <span>Session progress</span>
+                        <span className="inline-flex items-center gap-1 tabular-nums text-zinc-400">
+                          {isLoss && <ArrowDownIcon className="size-3.5 shrink-0" aria-hidden />}
+                          {isWin && <ArrowUpIcon className="size-3.5 shrink-0" aria-hidden />}
+                          {pct === null ? "—" : `${pct}%`}
+                        </span>
+                      </div>
+                      <div
+                        className="h-2.5 w-full overflow-hidden rounded-full bg-zinc-800"
+                        role="progressbar"
+                        aria-valuenow={barPct}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-label="Session outcome versus buy-in"
+                      >
+                        <div
+                          className={`h-full rounded-full transition-[width] duration-500 ease-out ${fillClass}`}
+                          style={{ width: `${barPct}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })()}
+              </section>
+            )}
+
+            {!analytics?.hasMoney && (
+              <div className="mt-8 rounded-lg border border-dashed border-zinc-800/80 bg-zinc-900/30 px-4 py-8 text-center">
+                <p className="text-sm text-zinc-500">No start or end balance on this session.</p>
+                <p className="mt-1 text-xs text-zinc-600">Edit the session to add bankroll numbers.</p>
               </div>
-            </div>
-          )}
+            )}
 
-          {!analytics?.hasMoney && (
-            <p className="border-b border-white/10 py-5 text-sm text-slate-500">No start or end balance recorded.</p>
-          )}
-
-          <div className="pt-6">
-            <h2 className="text-xs font-medium uppercase tracking-wider text-slate-500">Notes</h2>
-            <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-slate-300">{notesBody}</p>
+            <footer className="mt-8 flex flex-col gap-4 border-t border-zinc-800/80 pt-6 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0 flex-1">
+                {hasNotes ? (
+                  <p className="max-w-prose whitespace-pre-wrap text-sm leading-relaxed text-zinc-300">{notesTrimmed}</p>
+                ) : (
+                  <p className="text-sm italic text-zinc-600">No notes added</p>
+                )}
+              </div>
+              <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 sm:justify-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (editOpen) {
+                      void handleCancelEdit();
+                    } else {
+                      resetEditForm();
+                      setEditOpen(true);
+                    }
+                  }}
+                  className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-3.5 py-2 text-sm font-medium text-zinc-200 transition hover:border-white/15 hover:bg-white/[0.08]"
+                >
+                  <PencilIcon className="size-4 shrink-0 opacity-80" aria-hidden />
+                  {editOpen ? "Close editor" : "Edit"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  aria-label="Delete this session"
+                  className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-transparent px-3.5 py-2 text-sm font-medium text-zinc-400 transition hover:border-rose-500/40 hover:bg-rose-500/[0.08] hover:text-rose-200"
+                >
+                  <Trash2Icon className="size-4 shrink-0 opacity-80" aria-hidden />
+                  Delete
+                </button>
+              </div>
+            </footer>
           </div>
         </article>
 
         {editOpen && (
-          <section className="mt-6 rounded-2xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-xl sm:p-8">
-            <h2 className="text-lg font-semibold text-white">Edit</h2>
+          <section
+            ref={editSectionRef}
+            id="session-edit"
+            className="mt-6 scroll-mt-24 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.05] to-white/[0.02] p-5 shadow-lg shadow-black/20 ring-1 ring-white/[0.04] backdrop-blur-xl sm:p-7"
+          >
+            <h2 className="text-base font-semibold tracking-tight text-white">Edit session</h2>
             <div className="mt-6 space-y-4">
               <div>
                 <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-slate-500">
