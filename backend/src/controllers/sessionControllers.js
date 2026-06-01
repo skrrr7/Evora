@@ -1,4 +1,4 @@
-import Session from "../models/session.js";
+import Session from "../models/Session.js";
 
 // GET ALL
 export const getAllSession = async (req, res) => {
