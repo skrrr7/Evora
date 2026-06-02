@@ -18,13 +18,14 @@ const __dirname = path.resolve();
 
 
 //middleware
-if(process.env.NODE_ENV !== "production"){
-    app.use(
-        cors({
-            origin: "http://localhost:5173",
-        })
-    );
-}
+app.use(
+    cors({
+        origin: [
+            "http://localhost:5173",          // For local development
+            "https://evora-track.vercel.app" // For your live Vercel production site
+        ],
+    })
+);
 
 app.use(express.json());
 app.use(rateLimiter);
