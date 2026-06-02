@@ -4,12 +4,12 @@
     "outputDirectory": "frontend/dist",
     "builds": [
       {
-        "src": "backend/server.js",
+        "src": "backend/src/server.js",
         "use": "@vercel/node"
       }
     ],
     "rewrites": [
-      { "source": "/api/(.*)", "destination": "/backend/server.js" },
+      { "source": "/api/(.*)", "destination": "/backend/src/server.js?path=$1" },
       { "source": "/(.*)", "destination": "/index.html" }
     ]
   }

@@ -10,6 +10,17 @@ dotenv.config();
 
 const app = express()
 
+// Vercel rewrites may route `/api/*` to this single handler file and pass the
+// original path via `?path=...`. Reconstruct `/api/...` so Express routes
+// (like `/api/session`) continue to match.
+app.use((req, res, next) => {
+  const forwardedPath = req.query?.path;
+  if (typeof forwardedPath === "string" && forwardedPath.length > 0) {
+    req.url = `/api/${forwardedPath}`;
+  }
+  next();
+});
+
 // middleware
 app.use(
     cors({
