@@ -4,10 +4,17 @@ import { Redis } from "@upstash/redis"
 import dotenv from "dotenv";
 dotenv.config();
 
-// create a ratelimiter allows 100 request per min
-const ratelimit = new Ratelimit({
-    redis: Redis.fromEnv(),
-    limiter: Ratelimit.slidingWindow(10, "20 s"),
-});
+const hasUpstashConfig =
+  Boolean(process.env.UPSTASH_REDIS_REST_URL) &&
+  Boolean(process.env.UPSTASH_REDIS_REST_TOKEN);
+
+// On deployments where Upstash env vars are missing, skip rate-limiting
+// instead of crashing all API routes with a 500.
+const ratelimit = hasUpstashConfig
+  ? new Ratelimit({
+      redis: Redis.fromEnv(),
+      limiter: Ratelimit.slidingWindow(10, "20 s"),
+    })
+  : null;
 
 export default ratelimit;
