@@ -18,12 +18,15 @@ const __dirname = path.resolve();
 
 
 //middleware
+// middleware
 app.use(
     cors({
         origin: [
-            "http://localhost:5173",          // For local development
-            "https://evora-track.vercel.app" // For your live Vercel production site
+            "http://localhost:5173",             // For local development
+            "https://evora-track.vercel.app",    // Your other Vercel site
+            "https://evora-rho-one.vercel.app"   // THE NEW ACTIVE SITE CAUSING THE CORS ERROR
         ],
+        credentials: true // Good practice to include for session handling/cookies later
     })
 );
 
