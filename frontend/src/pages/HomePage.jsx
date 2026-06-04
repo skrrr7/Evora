@@ -42,16 +42,6 @@ function resultStyles(result) {
   return "bg-zinc-800 text-zinc-500 ring-1 ring-zinc-700";
 }
 
-// Helper to calculate ISO week number
-function getWeekNumber(d) {
-  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-  const dayNum = date.getUTCDay() || 7;
-  date.setUTCDate(date.getUTCDate() + 4 - dayNum);
-  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
-  const weekNo = Math.ceil(((date - yearStart) / 86400000 + 1) / 7);
-  return { year: date.getUTCFullYear(), week: weekNo };
-}
-
 function Sparkline({ values }) {
   if (values.length < 2) {
     return (
@@ -157,6 +147,7 @@ function SessionTableRow({ row, setSession }) {
 }
 
 function Kpi({ label, value, hint }) {
+  // Added conditional text tint to Net P/L if it highlights positive/negative totals dynamically
   const isNetPL = label === "Net P/L";
   const isNegative = value.includes("-");
   const isPositive = value.includes("+");
@@ -167,9 +158,7 @@ function Kpi({ label, value, hint }) {
 
   return (
     <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5 shadow-sm">
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
-        {label}
-      </p>
+      <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">{label}</p>
       <p className={`mt-2 text-3xl font-bold tracking-tight tabular-nums ${valueColor}`}>{value}</p>
       {hint && <p className="mt-1.5 text-xs text-zinc-500">{hint}</p>}
     </div>
@@ -243,7 +232,6 @@ const HomePage = () => {
     });
   }, [rows]);
 
-  // Monthly logic
   const monthly = useMemo(() => {
     const map = new Map();
     for (const r of rows) {
@@ -264,28 +252,6 @@ const HomePage = () => {
   }, [rows]);
 
   const monthBarMax = useMemo(() => Math.max(...monthly.map((m) => Math.abs(m.profit)), 1), [monthly]);
-
-  // NEW: Weekly Breakdowns logic
-  const weeklyStats = useMemo(() => {
-    const map = new Map();
-    for (const r of rows) {
-      const { year, week } = getWeekNumber(r.date);
-      const key = `${year}-W${String(week).padStart(2, "0")}`;
-      
-      if (!map.has(key)) {
-        map.set(key, { key, label: `Week ${week}, ${year}`, wins: 0, losses: 0, draws: 0, profit: 0 });
-      }
-      const wData = map.get(key);
-      if (r.result === "WIN") wData.wins += 1;
-      else if (r.result === "LOSS") wData.losses += 1;
-      else if (r.result === "DRAW") wData.draws += 1;
-      
-      if (r.profit != null) wData.profit += r.profit;
-    }
-    return Array.from(map.values())
-      .sort((a, b) => b.key.localeCompare(a.key)) // Show recent weeks first
-      .slice(0, 5); // Display the 5 most recent active weeks
-  }, [rows]);
 
   const gameWinRates = useMemo(() => {
     const map = new Map();
@@ -371,12 +337,15 @@ const HomePage = () => {
               <Kpi label="Sessions" value={String(sessions.length)} hint="Total recorded" />
             </div>
 
+            {/* UPGRADED SESSIONS CONTAINER: Max-height and view limits added */}
             <section className="mb-8">
               <div className="mb-3 flex items-center justify-between">
                 <h2 className="text-sm font-semibold tracking-wide text-zinc-400 uppercase">Recent Sessions</h2>
                 <span className="text-xs text-zinc-500">Newest first</span>
               </div>
               <div className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/40 shadow-sm">
+                
+                {/* Fixed and Sticky Table Header block */}
                 <div className="sticky top-0 z-10 hidden border-b border-zinc-800 bg-[#161B26] px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-zinc-400 sm:grid sm:grid-cols-[minmax(0,1.25fr)_minmax(0,0.85fr)_5.25rem_5.25rem_8.5rem_2.5rem] sm:gap-x-3">
                   <span className="text-left">Session</span>
                   <span className="text-left">Game</span>
@@ -386,6 +355,7 @@ const HomePage = () => {
                   <span className="block min-h-3 min-w-10 shrink-0" aria-hidden />
                 </div>
                 
+                {/* Scrollable Container Window */}
                 <div className="max-h-[380px] overflow-y-auto divide-y divide-zinc-800/50 scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent">
                   {rows.map((row) => (
                     <SessionTableRow key={row.session._id} row={row} setSession={setSessions} />
@@ -462,50 +432,6 @@ const HomePage = () => {
                 )}
               </section>
             </div>
-
-            {/* NEW SECTION: Weekly Session Records Breakdown */}
-            <section className="mb-8 rounded-xl border border-zinc-800 bg-zinc-900/40 p-5 shadow-sm">
-              <h2 className="text-sm font-semibold tracking-wide text-zinc-400 uppercase">Weekly Performance</h2>
-              <p className="mt-0.5 text-xs text-zinc-500">Track which weeks achieved the highest wins or losses</p>
-              
-              {weeklyStats.length === 0 ? (
-                <p className="mt-4 text-sm text-zinc-500">No weekly session data computed.</p>
-              ) : (
-                <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-                  {weeklyStats.map((w) => {
-                    const totalOutcomes = w.wins + w.losses + w.draws;
-                    const weekWinRate = totalOutcomes > 0 ? Math.round((w.wins / totalOutcomes) * 100) : 0;
-                    
-                    return (
-                      <div key={w.key} className="flex flex-col justify-between rounded-lg border border-zinc-800/80 bg-zinc-950/20 p-4">
-                        <div>
-                          <p className="text-xs font-bold text-zinc-300">{w.label}</p>
-                          <div className="mt-2.5 flex items-baseline gap-1.5">
-                            <span className="text-lg font-bold tabular-nums text-zinc-100">{weekWinRate}%</span>
-                            <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Win Rate</span>
-                          </div>
-                        </div>
-                        
-                        <div className="mt-4 pt-3 border-t border-zinc-800/60">
-                          <div className="flex justify-between text-xs text-zinc-400">
-                            <span>Record:</span>
-                            <span className="font-medium tabular-nums text-zinc-200">
-                              <span className="text-emerald-400">{w.wins}W</span> – <span className="text-rose-400">{w.losses}L</span>{w.draws > 0 && ` – ${w.draws}D`}
-                            </span>
-                          </div>
-                          <div className="mt-1 flex justify-between text-xs text-zinc-400">
-                            <span>Net P/L:</span>
-                            <span className={`font-semibold tabular-nums ${w.profit > 0 ? "text-emerald-400" : w.profit < 0 ? "text-rose-400" : "text-zinc-500"}`}>
-                              {w.profit === 0 ? "0" : `${w.profit > 0 ? "+" : ""}${formatMoney(w.profit)}`}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </section>
 
             <div className="grid min-w-0 gap-6 lg:grid-cols-2 lg:items-stretch">
               <section className="flex min-h-0 min-w-0 flex-col rounded-xl border border-zinc-800 bg-zinc-900/40 p-5 shadow-sm">
@@ -589,7 +515,7 @@ const HomePage = () => {
                     <div className="mt-4 min-w-0 overflow-x-auto">
                       <table className="w-full min-w-[240px] text-left text-sm">
                         <thead>
-                          <tr className="border-b border-zinc-800 text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                          <tr class="border-b border-zinc-800 text-[11px] font-bold uppercase tracking-wider text-zinc-500">
                             <th className="py-2 pr-4 font-semibold">Game</th>
                             <th className="py-2 pr-4 font-semibold tabular-nums">Sessions</th>
                             <th className="py-2 pr-4 font-semibold">W–L–D</th>
