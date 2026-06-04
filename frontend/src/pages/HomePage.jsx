@@ -113,10 +113,10 @@ function SessionTableRow({ row, setSession }) {
   return (
     <Link
       to={`/session/${session._id}`}
-      className="group grid grid-cols-[1fr_auto_auto_auto] items-center gap-x-3 border-b border-zinc-800/80 px-4 py-3.5 transition-colors hover:bg-zinc-800/40 sm:grid-cols-[minmax(0,1.25fr)_minmax(0,0.85fr)_5.25rem_5.25rem_8.5rem_2.5rem]"
+      className="group grid grid-cols-[1fr_auto_auto_auto] items-center gap-x-3 border-b border-zinc-800/40 px-4 py-3.5 transition-colors hover:bg-zinc-800/30 sm:grid-cols-[minmax(0,1.25fr)_minmax(0,0.85fr)_5.25rem_5.25rem_8.5rem_2.5rem]"
     >
       <span className="min-w-0 truncate font-medium text-zinc-100">{session.title}</span>
-      <span className="hidden min-w-0 truncate text-left text-sm text-zinc-500 sm:block">{session.game || "—"}</span>
+      <span className="hidden min-w-0 truncate text-left text-sm text-zinc-400 sm:block">{session.game || "—"}</span>
       <span className="flex justify-end">
         <span
           className={`inline-flex rounded-md px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${resultStyles(result)}`}
@@ -125,31 +125,42 @@ function SessionTableRow({ row, setSession }) {
         </span>
       </span>
       <span
-        className={`text-right text-sm tabular-nums ${
+        className={`text-right text-sm font-medium tabular-nums ${
           profit == null ? "text-zinc-600" : profit > 0 ? "text-emerald-400" : profit < 0 ? "text-rose-400" : "text-zinc-400"
         }`}
       >
         {profit == null ? "—" : `${profit >= 0 ? "+" : ""}${formatMoney(profit)}`}
       </span>
-      <span className="hidden text-right text-xs tabular-nums text-zinc-500 sm:block">{formatDate(row.date)}</span>
-      <button
-        type="button"
-        onClick={handleDelete}
-        className="flex justify-end rounded-md p-1.5 text-zinc-500 opacity-0 transition hover:bg-rose-500/10 hover:text-rose-400 group-hover:opacity-100"
-        aria-label="Delete session"
-      >
-        <Trash2Icon className="size-4" />
-      </button>
+      <span className="hidden text-right text-xs tabular-nums text-zinc-400 sm:block">{formatDate(row.date)}</span>
+      <div className="flex justify-end">
+        <button
+          type="button"
+          onClick={handleDelete}
+          className="flex justify-end rounded-md p-1.5 text-zinc-500 opacity-0 transition hover:bg-rose-500/10 hover:text-rose-400 group-hover:opacity-100"
+          aria-label="Delete session"
+        >
+          <Trash2Icon className="size-4" />
+        </button>
+      </div>
     </Link>
   );
 }
 
 function Kpi({ label, value, hint }) {
+  // Added conditional text tint to Net P/L if it highlights positive/negative totals dynamically
+  const isNetPL = label === "Net P/L";
+  const isNegative = value.includes("-");
+  const isPositive = value.includes("+");
+  
+  let valueColor = "text-zinc-50";
+  if (isNetPL && isNegative) valueColor = "text-rose-400";
+  if (isNetPL && isPositive) valueColor = "text-emerald-400";
+
   return (
-    <div className="rounded-lg border border-zinc-800/80 bg-zinc-900/30 px-4 py-4">
-      <p className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">{label}</p>
-      <p className="mt-2 text-2xl font-semibold tracking-tight text-zinc-50 tabular-nums">{value}</p>
-      {hint && <p className="mt-1 text-xs text-zinc-600">{hint}</p>}
+    <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5 shadow-sm">
+      <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">{label}</p>
+      <p className={`mt-2 text-3xl font-bold tracking-tight tabular-nums ${valueColor}`}>{value}</p>
+      {hint && <p className="mt-1.5 text-xs text-zinc-500">{hint}</p>}
     </div>
   );
 }
@@ -279,9 +290,9 @@ const HomePage = () => {
   const winLossTotal = stats.wins + stats.losses + stats.draws;
 
   return (
-    <div className="relative isolate min-h-screen overflow-hidden bg-slate-950 font-sans text-slate-100">
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_100%_70%_at_50%_-10%,rgba(139,92,246,0.22),transparent_50%),radial-gradient(ellipse_80%_50%_at_100%_60%,rgba(34,211,238,0.08),transparent_45%)]" />
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-transparent to-slate-950" />
+    <div className="relative isolate min-h-screen overflow-hidden bg-[#0B0F19] font-sans text-slate-100">
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_100%_70%_at_50%_-10%,rgba(139,92,246,0.18),transparent_50%),radial-gradient(ellipse_80%_50%_at_100%_60%,rgba(34,211,238,0.05),transparent_45%)]" />
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-transparent to-[#0B0F19]" />
 
       <Navbar />
       {rateLimited && <RateLimitedUI />}
@@ -295,12 +306,12 @@ const HomePage = () => {
 
         {!loading && !rateLimited && sessions.length > 0 && (
           <>
-            <div className="mb-10">
-              <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Dashboard</h1>
-              <p className="mt-1 text-sm text-zinc-500">Evora — session performance at a glance</p>
+            <div className="mb-8">
+              <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">Dashboard</h1>
+              <p className="mt-1 text-sm text-zinc-400">Evora — session performance at a glance</p>
             </div>
 
-            <div className="mb-6 grid gap-3 sm:grid-cols-3">
+            <div className="mb-8 grid gap-4 sm:grid-cols-3">
               <Kpi
                 label="Net P/L"
                 value={
@@ -326,13 +337,16 @@ const HomePage = () => {
               <Kpi label="Sessions" value={String(sessions.length)} hint="Total recorded" />
             </div>
 
+            {/* UPGRADED SESSIONS CONTAINER: Max-height and view limits added */}
             <section className="mb-8">
               <div className="mb-3 flex items-center justify-between">
-                <h2 className="text-sm font-medium text-zinc-300">Sessions</h2>
-                <span className="text-xs text-zinc-600">Newest first</span>
+                <h2 className="text-sm font-semibold tracking-wide text-zinc-400 uppercase">Recent Sessions</h2>
+                <span className="text-xs text-zinc-500">Newest first</span>
               </div>
-              <div className="overflow-hidden rounded-lg border border-zinc-800/80 bg-zinc-900/20">
-                <div className="hidden border-b border-zinc-800/80 bg-zinc-900/50 px-4 py-2.5 text-[11px] font-medium uppercase tracking-wider text-zinc-500 sm:grid sm:grid-cols-[minmax(0,1.25fr)_minmax(0,0.85fr)_5.25rem_5.25rem_8.5rem_2.5rem] sm:gap-x-3">
+              <div className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/40 shadow-sm">
+                
+                {/* Fixed and Sticky Table Header block */}
+                <div className="sticky top-0 z-10 hidden border-b border-zinc-800 bg-[#161B26] px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-zinc-400 sm:grid sm:grid-cols-[minmax(0,1.25fr)_minmax(0,0.85fr)_5.25rem_5.25rem_8.5rem_2.5rem] sm:gap-x-3">
                   <span className="text-left">Session</span>
                   <span className="text-left">Game</span>
                   <span className="text-right">Result</span>
@@ -340,7 +354,9 @@ const HomePage = () => {
                   <span className="text-right">Date</span>
                   <span className="block min-h-3 min-w-10 shrink-0" aria-hidden />
                 </div>
-                <div className="divide-y divide-zinc-800/80">
+                
+                {/* Scrollable Container Window */}
+                <div className="max-h-[380px] overflow-y-auto divide-y divide-zinc-800/50 scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent">
                   {rows.map((row) => (
                     <SessionTableRow key={row.session._id} row={row} setSession={setSessions} />
                   ))}
@@ -348,25 +364,25 @@ const HomePage = () => {
               </div>
             </section>
 
-            <div className="mb-6 grid gap-6 lg:grid-cols-5">
-              <section className="rounded-lg border border-zinc-800/80 bg-zinc-900/20 p-5 lg:col-span-3">
+            <div className="mb-8 grid gap-6 lg:grid-cols-5">
+              <section className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5 shadow-sm lg:col-span-3">
                 <div className="flex items-baseline justify-between gap-4">
-                  <h2 className="text-sm font-medium text-zinc-300">Net performance</h2>
-                  <span className="text-xs text-zinc-600">Cumulative profit</span>
+                  <h2 className="text-sm font-semibold tracking-wide text-zinc-400 uppercase">Net performance</h2>
+                  <span className="text-xs text-zinc-500">Cumulative profit</span>
                 </div>
-                <div className="mt-4">
+                <div className="mt-6">
                   <Sparkline values={cumulativeSeries} />
                 </div>
               </section>
 
-              <section className="rounded-lg border border-zinc-800/80 bg-zinc-900/20 p-5 lg:col-span-2">
-                <h2 className="text-sm font-medium text-zinc-300">Outcomes</h2>
-                <p className="mt-0.5 text-xs text-zinc-600">Win / loss / draw mix</p>
+              <section className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5 shadow-sm lg:col-span-2">
+                <h2 className="text-sm font-semibold tracking-wide text-zinc-400 uppercase">Outcomes</h2>
+                <p className="mt-0.5 text-xs text-zinc-500">Win / loss / draw mix</p>
                 {winLossTotal === 0 ? (
-                  <p className="mt-6 text-sm text-zinc-600">No labeled outcomes yet</p>
+                  <p className="mt-6 text-sm text-zinc-500">No labeled outcomes yet</p>
                 ) : (
                   <>
-                    <div className="mt-5 flex h-2 overflow-hidden rounded-full bg-zinc-800">
+                    <div className="mt-6 flex h-2 overflow-hidden rounded-full bg-zinc-800">
                       {stats.wins > 0 && (
                         <div
                           className="bg-emerald-500/80"
@@ -389,27 +405,27 @@ const HomePage = () => {
                         />
                       )}
                     </div>
-                    <ul className="mt-4 space-y-2 text-sm">
+                    <ul className="mt-5 space-y-2.5 text-sm">
                       <li className="flex justify-between text-zinc-400">
                         <span className="flex items-center gap-2">
                           <span className="size-1.5 rounded-full bg-emerald-500" />
                           Wins
                         </span>
-                        <span className="tabular-nums text-zinc-200">{stats.wins}</span>
+                        <span className="font-semibold tabular-nums text-zinc-200">{stats.wins}</span>
                       </li>
                       <li className="flex justify-between text-zinc-400">
                         <span className="flex items-center gap-2">
                           <span className="size-1.5 rounded-full bg-rose-500" />
                           Losses
                         </span>
-                        <span className="tabular-nums text-zinc-200">{stats.losses}</span>
+                        <span className="font-semibold tabular-nums text-zinc-200">{stats.losses}</span>
                       </li>
                       <li className="flex justify-between text-zinc-400">
                         <span className="flex items-center gap-2">
                           <span className="size-1.5 rounded-full bg-zinc-500" />
                           Draws
                         </span>
-                        <span className="tabular-nums text-zinc-200">{stats.draws}</span>
+                        <span className="font-semibold tabular-nums text-zinc-200">{stats.draws}</span>
                       </li>
                     </ul>
                   </>
@@ -417,115 +433,113 @@ const HomePage = () => {
               </section>
             </div>
 
-            <div className="mb-8 grid min-w-0 gap-6 lg:grid-cols-2 lg:items-stretch">
-              <section className="flex min-h-0 min-w-0 flex-col rounded-lg border border-zinc-800/80 bg-zinc-900/20 p-5">
-                <h2 className="text-sm font-medium text-zinc-300">Monthly progress</h2>
-                <p className="mt-0.5 text-xs text-zinc-600">Net profit by calendar month</p>
+            <div className="grid min-w-0 gap-6 lg:grid-cols-2 lg:items-stretch">
+              <section className="flex min-h-0 min-w-0 flex-col rounded-xl border border-zinc-800 bg-zinc-900/40 p-5 shadow-sm">
+                <h2 className="text-sm font-semibold tracking-wide text-zinc-400 uppercase">Monthly progress</h2>
+                <p className="mt-0.5 text-xs text-zinc-500">Net profit by calendar month</p>
                 {monthly.length === 0 ? (
-                <p className="mt-6 text-sm text-zinc-600">No data</p>
-              ) : (
-                <ul className="mt-5 flex-1 space-y-3">
-                  {monthly.map((m) => {
-                    const w = (Math.abs(m.profit) / monthBarMax) * 100;
-                    return (
-                      <li key={m.key} className="flex items-center gap-4">
-                        <span className="w-24 shrink-0 text-xs text-zinc-500">{m.label}</span>
-                        <div className="min-w-0 flex-1">
-                          <div className="h-1.5 overflow-hidden rounded-full bg-zinc-800">
-                            <div
-                              className={`h-full rounded-full ${m.profit >= 0 ? "bg-emerald-500/70" : "bg-rose-500/70"}`}
-                              style={{ width: `${w}%` }}
-                            />
+                  <p className="mt-6 text-sm text-zinc-500">No data</p>
+                ) : (
+                  <ul className="mt-5 flex-1 space-y-3.5">
+                    {monthly.map((m) => {
+                      const w = (Math.abs(m.profit) / monthBarMax) * 100;
+                      return (
+                        <li key={m.key} className="flex items-center gap-4">
+                          <span className="w-24 shrink-0 text-xs font-medium text-zinc-400">{m.label}</span>
+                          <div className="min-w-0 flex-1">
+                            <div className="h-1.5 overflow-hidden rounded-full bg-zinc-800/80">
+                              <div
+                                className={`h-full rounded-full ${m.profit >= 0 ? "bg-emerald-500/70" : "bg-rose-500/70"}`}
+                                style={{ width: `${w}%` }}
+                              />
+                            </div>
                           </div>
-                        </div>
-                        <span
-                          className={`w-20 shrink-0 text-right text-xs tabular-nums ${
-                            m.profit > 0 ? "text-emerald-400" : m.profit < 0 ? "text-rose-400" : "text-zinc-500"
-                          }`}
-                        >
-                          {m.profit === 0 ? "0" : `${m.profit > 0 ? "+" : ""}${formatMoney(m.profit)}`}
-                        </span>
-                        <span className="hidden w-10 shrink-0 text-right text-[11px] text-zinc-600 sm:block">
-                          {m.count}×
-                        </span>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
+                          <span
+                            className={`w-20 shrink-0 text-right text-xs font-semibold tabular-nums ${
+                              m.profit > 0 ? "text-emerald-400" : m.profit < 0 ? "text-rose-400" : "text-zinc-500"
+                            }`}
+                          >
+                            {m.profit === 0 ? "0" : `${m.profit > 0 ? "+" : ""}${formatMoney(m.profit)}`}
+                          </span>
+                          <span className="hidden w-10 shrink-0 text-right text-[11px] text-zinc-500 sm:block">
+                            {m.count}×
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
               </section>
 
-              <section className="flex min-h-0 min-w-0 flex-col rounded-lg border border-zinc-800/80 bg-zinc-900/20 p-5">
-                <h2 className="text-sm font-medium text-zinc-300">Win rate by game</h2>
-                <p className="mt-0.5 text-xs text-zinc-600">
+              <section className="flex min-h-0 min-w-0 flex-col rounded-xl border border-zinc-800 bg-zinc-900/40 p-5 shadow-sm">
+                <h2 className="text-sm font-semibold tracking-wide text-zinc-400 uppercase">Win rate by game</h2>
+                <p className="mt-0.5 text-xs text-zinc-500">
                   Wins ÷ (wins + losses + draws), only sessions with a recorded outcome
                 </p>
 
                 {gameWinRates.length === 0 ? (
-                <p className="mt-5 text-sm text-zinc-600">No outcomes yet — add sessions with start/end balances.</p>
-              ) : (
-                <>
-                  {(gameHighLow.best || gameHighLow.worst) && (
-                    <div className="mt-4 flex flex-col gap-2 rounded-md border border-zinc-800/60 bg-zinc-950/40 px-3 py-3 text-sm">
-                      {gameHighLow.best && (
-                        <p className="text-zinc-400">
-                          <span className="font-medium text-emerald-400/90">Highest</span>
-                          <span className="mx-1.5 text-zinc-600">·</span>
-                          <span className="text-zinc-200">{gameHighLow.best.game}</span>
-                          <span className="ml-1.5 tabular-nums text-zinc-100">
-                            {Math.round(gameHighLow.best.winRate)}%
-                          </span>
-                          <span className="ml-1 text-xs text-zinc-600">
-                            ({gameHighLow.best.wins}W-{gameHighLow.best.losses}L
-                            {gameHighLow.best.draws ? `-${gameHighLow.best.draws}D` : ""})
-                          </span>
-                        </p>
-                      )}
-                      {gameHighLow.worst && (
-                        <p className="text-zinc-400">
-                          <span className="font-medium text-rose-400/90">Lowest</span>
-                          <span className="mx-1.5 text-zinc-600">·</span>
-                          <span className="text-zinc-200">{gameHighLow.worst.game}</span>
-                          <span className="ml-1.5 tabular-nums text-zinc-100">
-                            {Math.round(gameHighLow.worst.winRate)}%
-                          </span>
-                          <span className="ml-1 text-xs text-zinc-600">
-                            ({gameHighLow.worst.wins}W-{gameHighLow.worst.losses}L
-                            {gameHighLow.worst.draws ? `-${gameHighLow.worst.draws}D` : ""})
-                          </span>
-                        </p>
-                      )}
-                    </div>
-                  )}
+                  <p className="mt-5 text-sm text-zinc-500">No data recorded.</p>
+                ) : (
+                  <>
+                    {(gameHighLow.best || gameHighLow.worst) && (
+                      <div className="mt-4 flex flex-col gap-2 rounded-lg border border-zinc-800/60 bg-zinc-950/30 px-3 py-2.5 text-xs">
+                        {gameHighLow.best && (
+                          <p className="text-zinc-400">
+                            <span className="font-semibold text-emerald-400">Highest</span>
+                            <span className="mx-1.5 text-zinc-700">·</span>
+                            <span className="text-zinc-200">{gameHighLow.best.game}</span>
+                            <span className="ml-1.5 font-medium tabular-nums text-zinc-100">
+                              {Math.round(gameHighLow.best.winRate)}%
+                            </span>
+                            <span className="ml-1 text-[10px] text-zinc-500">
+                              ({gameHighLow.best.wins}W-{gameHighLow.best.losses}L)
+                            </span>
+                          </p>
+                        )}
+                        {gameHighLow.worst && (
+                          <p className="text-zinc-400">
+                            <span className="font-semibold text-rose-400">Lowest</span>
+                            <span className="mx-1.5 text-zinc-700">·</span>
+                            <span className="text-zinc-200">{gameHighLow.worst.game}</span>
+                            <span className="ml-1.5 font-medium tabular-nums text-zinc-100">
+                              {Math.round(gameHighLow.worst.winRate)}%
+                            </span>
+                            <span className="ml-1 text-[10px] text-zinc-500">
+                              ({gameHighLow.worst.wins}W-{gameHighLow.worst.losses}L)
+                            </span>
+                          </p>
+                        )}
+                      </div>
+                    )}
 
-                  <div className="mt-4 min-w-0 overflow-x-auto">
-                    <table className="w-full min-w-[240px] text-left text-sm">
-                      <thead>
-                        <tr className="border-b border-zinc-800 text-[11px] font-medium uppercase tracking-wider text-zinc-500">
-                          <th className="py-2 pr-4 font-medium">Game</th>
-                          <th className="py-2 pr-4 font-medium tabular-nums">Sessions</th>
-                          <th className="py-2 pr-4 font-medium">W–L–D</th>
-                          <th className="py-2 text-right font-medium tabular-nums">Win rate</th>
-                        </tr>
-                      </thead>
-                      <tbody className="text-zinc-300">
-                        {gameWinRates.map((g) => (
-                          <tr key={g.game} className="border-b border-zinc-800/60 last:border-0">
-                            <td className="py-2.5 pr-4 font-medium text-zinc-100">{g.game}</td>
-                            <td className="py-2.5 pr-4 tabular-nums text-zinc-500">{g.sessions}</td>
-                            <td className="py-2.5 pr-4 tabular-nums text-zinc-500">
-                              {g.wins}-{g.losses}-{g.draws}
-                            </td>
-                            <td className="py-2.5 text-right tabular-nums text-zinc-200">
-                              {g.winRate != null ? `${Math.round(g.winRate)}%` : "—"}
-                            </td>
+                    <div className="mt-4 min-w-0 overflow-x-auto">
+                      <table className="w-full min-w-[240px] text-left text-sm">
+                        <thead>
+                          <tr class="border-b border-zinc-800 text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                            <th className="py-2 pr-4 font-semibold">Game</th>
+                            <th className="py-2 pr-4 font-semibold tabular-nums">Sessions</th>
+                            <th className="py-2 pr-4 font-semibold">W–L–D</th>
+                            <th className="py-2 text-right font-semibold tabular-nums">Win rate</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </>
-              )}
+                        </thead>
+                        <tbody className="text-zinc-300 divide-y divide-zinc-800/40">
+                          {gameWinRates.map((g) => (
+                            <tr key={g.game} className="last:border-0">
+                              <td className="py-2.5 pr-4 font-medium text-zinc-100">{g.game}</td>
+                              <td className="py-2.5 pr-4 tabular-nums text-zinc-400">{g.sessions}</td>
+                              <td className="py-2.5 pr-4 tabular-nums text-zinc-500">
+                                {g.wins}-{g.losses}-{g.draws}
+                              </td>
+                              <td className="py-2.5 text-right font-medium tabular-nums text-zinc-200">
+                                {g.winRate != null ? `${Math.round(g.winRate)}%` : "—"}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </>
+                )}
               </section>
             </div>
           </>
